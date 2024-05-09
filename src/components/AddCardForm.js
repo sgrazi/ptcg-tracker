@@ -4,6 +4,7 @@ import { parseJSON } from '../logic/JSONParser';
 
 const AddCardForm = ({ onClose }) => {
   const [existingCategories, setExistingCategories] = useState([]);
+  const [existingSets, setExistingSets] = useState([]);
   const [name, setName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [categories, setCategories] = useState([]);
@@ -18,7 +19,14 @@ const AddCardForm = ({ onClose }) => {
         setExistingCategories(JSON.parse(JSON.parse(response.Payload)));
       }
     }
+    async function fetchSet() {
+      const response = await invokeLambda("GetSet");
+      if (response && response.StatusCode === 200) {
+        setExistingSets(JSON.parse(JSON.parse(response.Payload)));
+      }
+    }
     fetchCategories();
+    fetchSet();
   }, []);
 
   const handleCheckboxChange = (categoryId) => {
@@ -29,6 +37,10 @@ const AddCardForm = ({ onClose }) => {
       // Category not selected, add it
       setCategories([...categories, categoryId]);
     }
+  };
+
+  const handleSelectChange = (event) => {
+    setSet(event.target.value);
   };
 
   const handleSubmit = async (event) => {
@@ -92,13 +104,20 @@ const AddCardForm = ({ onClose }) => {
             ))}
           </div>
           <div style={formGroupStyle}>
-            <label>Set</label>
-            <input
-              type="text"
+            <label>Set :</label>
+            <select
+              style={{width:'90%', height:'40px'}}
+              id="existingSetsDropdown"
               value={set}
-              onChange={(e) => setSet(e.target.value)}
-              style={inputStyle}
-            />
+              onChange={handleSelectChange}
+            >
+              <option value="">Select an existing set</option>
+              {existingSets.map((set, index) => (
+                <option key={index} value={set.set_id}>
+                  {set.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div style={formGroupStyle}>
             <label>Cantidad Deseada</label>
