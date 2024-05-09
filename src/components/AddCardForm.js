@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { invokeLambda, invokeLambdaWBody } from '../logic/LambdaInvoker';
-import { parseJSON } from '../logic/JSONParser';
 
-const AddCardForm = ({ onClose }) => {
-  const [existingCategories, setExistingCategories] = useState([]);
+const AddCardForm = ({ onClose, existingCategories }) => {
   const [existingSets, setExistingSets] = useState([]);
   const [name, setName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -13,19 +11,14 @@ const AddCardForm = ({ onClose }) => {
   const [owned, setOwned] = useState('');
   
   useEffect(() => {
-    async function fetchCategories() {
-      const response = await invokeLambda("GetCategory");
-      if (response && response.StatusCode === 200) {
-        setExistingCategories(JSON.parse(JSON.parse(response.Payload)));
-      }
-    }
     async function fetchSet() {
       const response = await invokeLambda("GetSet");
       if (response && response.StatusCode === 200) {
-        setExistingSets(JSON.parse(JSON.parse(response.Payload)));
+        let sets = JSON.parse(JSON.parse(response.Payload))
+        const sortedSets = sets.sort((a, b) => b.set_id - a.set_id);
+        setExistingSets(sortedSets);
       }
     }
-    fetchCategories();
     fetchSet();
   }, []);
 
@@ -111,7 +104,7 @@ const AddCardForm = ({ onClose }) => {
               value={set}
               onChange={handleSelectChange}
             >
-              <option value="">Select an existing set</option>
+              <option value="">Elegir set</option>
               {existingSets.map((set, index) => (
                 <option key={index} value={set.set_id}>
                   {set.name}

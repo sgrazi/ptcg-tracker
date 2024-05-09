@@ -4,7 +4,6 @@ const searchViewStyle = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  marginBottom: '15px',
   width: '100%'
 };
 

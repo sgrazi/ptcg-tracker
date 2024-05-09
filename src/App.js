@@ -31,14 +31,30 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+  const [existingCategories, setExistingCategories] = useState([]);
 
   useEffect(() => {
+    async function fetchCategories() {
+      const response = await invokeLambda("GetCategory");
+      if (response && response.StatusCode === 200) {
+        setExistingCategories(JSON.parse(JSON.parse(response.Payload)));
+      }
+    }
+    fetchCategories();
     handleSearch("");
   }, []);
 
   const handleSearch = async (searchTerm) => {
     setSearchTerm(searchTerm)
     const response = await invokeLambdaWBody("GetCard", {"search_query": searchTerm});
+    const jsonResponse = JSON.parse(response)
+    setCards(jsonResponse["items"]);
+    setTotalPages(Math.ceil(jsonResponse["total_count"] / 20))
+  };
+
+  const handleFilterByCategory = async (cat_id) => {
+    setSearchTerm("")
+    const response = await invokeLambdaWBody("GetCard", {"category_query": cat_id});
     const jsonResponse = JSON.parse(response)
     setCards(jsonResponse["items"]);
     setTotalPages(Math.ceil(jsonResponse["total_count"] / 20))
@@ -80,14 +96,14 @@ function App() {
   return (
     <div className="app">
       <img src="/logo.png" alt="Website Logo" className="logo" />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen}/>
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} existingCategories={existingCategories}/>
       {isSidebarOpen && <div style={overlay} onClick={()=>setIsSidebarOpen(false)} />}
       <Search searchCallback={handleSearch} />
       {deleteCardConfirm && <>
         <button style={deleteButtonStyle} onClick={() => deleteCard(cardIdToDelete)}>Borrar</button>
         <button style={cancelButtonStyle} onClick={() => setDeleteCardConfirm(false)}>NO borrar</button>
       </>}
-      <MainView cards={cards} onDeleteCard={deleteCard}/>
+      <MainView cards={cards} search={handleFilterByCategory} onDeleteCard={deleteCard} existingCategories={existingCategories}/>
       <div style={paginationStyle}>
         <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
         <span>{currentPage} / {totalPages}</span>

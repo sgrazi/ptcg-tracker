@@ -44,7 +44,7 @@ const mainButtonStyle = {
 };
 
 
-function Sidebar({isOpen, setIsOpen}) {
+function Sidebar({isOpen, setIsOpen, existingCategories}) {
   const [showAddCardForm, setShowAddCardForm] = useState(false);
   const [showAddCategoryForm, setShowAddCategoryForm] = useState(false);
 
@@ -63,7 +63,7 @@ function Sidebar({isOpen, setIsOpen}) {
         <button style={buttonStyle} onClick={() => setIsOpen(false)}>Close</button>
         <h2>Sidebar</h2>
         <button style={mainButtonStyle} onClick={toggleAddCardForm}>Agregar Carta</button>
-        {showAddCardForm && <AddCardForm onClose={toggleAddCardForm}/>}
+        {showAddCardForm && <AddCardForm onClose={toggleAddCardForm} existingCategories={existingCategories}/>}
         <button style={mainButtonStyle} onClick={toggleAddCategoryForm}>Agregar Categoria</button>
         {showAddCategoryForm && <AddCategoryForm onClose={toggleAddCategoryForm}/>}
       </div>
